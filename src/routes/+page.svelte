@@ -98,7 +98,11 @@
             </div>
             <div class="flex justify-left space-x-1">
                 <p class="text-sm text-gray-600 font-semibold">Authors:</p>
+                {#if paper.author.length > 4}
+                <p class="text-sm text-gray-600 italic">{paper.author[0]} , et. al</p>
+                {:else}
                 <p class="text-sm text-gray-600 italic">{paper.author.join(', ')}</p>
+                {/if}
             </div>
             <div class="flex justify-left space-x-1">
                 <p class="text-sm text-gray-600 font-semibold">Citations:</p>
