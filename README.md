@@ -1,38 +1,20 @@
-# sv
+# Paperhub
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+This will be a general website for scientific papers (*main focus in the beginning will be Physics*), currently in progress!🏗️
 
-## Creating a project
+## Database
 
-If you're seeing this, you've probably already done this step. Congrats!
+**-> Using the database of Arxiv and Semantic Scholar!!**
 
-```bash
-# create a new project in the current directory
-npx sv create
 
-# create a new project in my-app
-npx sv create my-app
-```
+## Daily Papers
 
-## Developing
+The biggest part of this website will be the most recent scientific (daily), displaying the most recent papers, hopefully at least one a day.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+These will be given on the main page, with each with an upvote button to increase popularity 📈.
 
-```bash
-npm run dev
+### Weekly / Monthly
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+The most important papers per week or per month will be available (side project).
 
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+*inspired by https://huggingface.co/papers?date=2025-01-06*
