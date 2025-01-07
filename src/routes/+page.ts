@@ -1,5 +1,13 @@
+// src/routes/+page.ts
+
+// Define the `load` function for server-side or client-side data fetching
 export const load = async ({ fetch }) => {
-    const res = await fetch('/api/papers'); // Call your API route
-    const papers = await res.json(); // Parse the JSON response
-    return { papers }; // Return the data to the Svelte page
+  // Fetch data from the API route you created (e.g., /api/papers)
+  const res = await fetch('/api/papers?query=high+energy+physics');
+  const parsedData = await res.json(); // Parse the JSON response
+
+  // Return the data to the page
+  return {
+    papers: parsedData,
   };
+};
