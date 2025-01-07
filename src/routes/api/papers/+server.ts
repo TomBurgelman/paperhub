@@ -1,8 +1,11 @@
 import { DOMParser } from '@xmldom/xmldom'; // Import the DOMParser from xmldom
 
 export async function GET({ url }) {
-  const searchQuery = url.searchParams.get('query') || 'high+energy+physics';
-  const apiUrl = `http://export.arxiv.org/api/query?search_query=all:${searchQuery}&start=0&max_results=10&sortBy=submittedDate&sortOrder=descending`;
+  const searchQuery = url.searchParams.get('query') || 'hep-th';
+  const title = url.searchParams.get('title') || '';
+  const start = url.searchParams.get('start') || 0;
+  const maxResults = url.searchParams.get('maxResults') || 20;
+  const apiUrl = `http://export.arxiv.org/api/query?search_query=cat:"${searchQuery}"${title ? `+AND+ti:"${title}"` : ''}&start=${start}&max_results=${maxResults}&sortBy=submittedDate&sortOrder=descending`;
 
   try {
     // Fetch data from the ArXiv API
@@ -10,10 +13,13 @@ export async function GET({ url }) {
     const xmlData = await response.text(); // ArXiv API returns XML
 
     // Parse the XML response into JSON
-    const parsedData = parseArxivXml(xmlData);
+    const parsedData = await parseArxivXml(xmlData);
+
+    // Fetch citation counts from Semantic Scholar API
+    const papersWithCitations = await fetchCitationCounts(parsedData);
 
     // Return the JSON response
-    return new Response(JSON.stringify(parsedData), {
+    return new Response(JSON.stringify(papersWithCitations), {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
@@ -33,12 +39,36 @@ function parseArxivXml(xml) {
   const entries = Array.from(doc.getElementsByTagName('entry'));
 
   return entries.map((entry) => ({
-    title: entry.getElementsByTagName('title')[0].textContent.trim(),
-    summary: entry.getElementsByTagName('summary')[0].textContent.trim(),
-    published: entry.getElementsByTagName('published')[0].textContent.trim(),
-    link: entry.getElementsByTagName('id')[0].textContent.trim(),
+    title: entry.getElementsByTagName('title')[0]?.textContent?.trim() || '',
+    summary: entry.getElementsByTagName('summary')[0]?.textContent?.trim() || '',
+    published: entry.getElementsByTagName('published')[0]?.textContent?.trim().split('T')[0] || '',
+    link: entry.getElementsByTagName('id')[0]?.textContent?.trim() || '',
     author: Array.from(entry.getElementsByTagName('author')).map((author) =>
-      author.getElementsByTagName('name')[0].textContent.trim()
+      author.getElementsByTagName('name')[0]?.textContent?.trim() || ''
     ),
   }));
+}
+
+// Helper function to fetch citation counts from Semantic Scholar API
+async function fetchCitationCounts(papers) {
+  const apiKey = 'YOUR_SEMANTIC_SCHOLAR_API_KEY';
+  const baseUrl = 'https://api.semanticscholar.org/graph/v1/paper/';
+  const fields = 'citationCount';
+
+  const papersWithCitations = await Promise.all(
+    papers.map(async (paper) => {
+      const paperId = paper.link.split('/abs/')[1];
+      const url = `${baseUrl}${paperId}?fields=${fields}`;
+      const response = await fetch(url, {
+        headers: { 'x-api-key': apiKey },
+      });
+      const data = await response.json();
+      return {
+        ...paper,
+        citationCount: data.citationCount || 0,
+      };
+    })
+  );
+
+  return papersWithCitations;
 }
